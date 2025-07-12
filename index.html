@@ -64,7 +64,7 @@
         /* Main Content */
         main {
             padding: 20px 30px;
-            transition: margin-right 0.3s;
+            transition: margin-right 0.3s ease-in-out;
         }
 
         h2 {
@@ -221,7 +221,8 @@
             right: -350px;
             top: 0;
             bottom: 0;
-            transition: right 0.3s;
+            transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0; /* Start with opacity 0 */
             z-index: 999;
             overflow-y: auto;
             box-shadow: -5px 0 15px rgba(0,0,0,0.3);
@@ -229,6 +230,7 @@
 
         .selection-sidebar.open {
             right: 0;
+            opacity: 1; /* Fade in when open */
         }
 
         .selection-header {
@@ -282,6 +284,12 @@
             border: none;
             color: #f44336;
             cursor: pointer;
+            font-size: 18px; /* Make the button bigger */
+            transition: text-shadow 0.3s ease-in-out; /* Add transition for glow effect */
+        }
+
+        .remove-token:hover {
+            text-shadow: 0 0 8px #f44336; /* Add glow effect on hover */
         }
 
         /* Slider - Hidden by default */
@@ -319,6 +327,7 @@
             left: 0;
             top: 0;
             cursor: grab;
+            transition: left 0.1s ease-out; /* Add transition for smoother movement */
             display: flex;
             align-items: center;
             justify-content: center;
