@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Token Dashboard</title>
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            transition: padding-right 0.3s;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #1b1b1b;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            margin-left: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: background-color 0.3s;
+        }
+
+        nav a.active {
+            background-color: #6f4eff;
+            color: black;
+        }
+
+        .connect-wallet {
+            background-color: #6f4eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px 30px;
+            transition: margin-right 0.3s;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #aaa;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background-color: #2d2d2d;
+            color: white;
+        }
+
+        .select-all {
+            background-color: #6f4eff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .select-all .badge {
+            background-color: #4caf50;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .tabs {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #2d2d2d;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            background-color: #6f4eff;
+            color: black;
+        }
+
+        .token-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .token-card {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .token-card:hover {
+            transform: scale(1.03);
+        }
+
+        .token-card.selected {
+            outline: 2px solid #6f4eff;
+        }
+
+        .token-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+        }
+
+        .token-symbol {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .token-price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .price-change {
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .price-change.up {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .price-change.down {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .add-to-team {
+            background-color: #6f4eff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: auto;
+        }
+
+        .add-to-team:hover {
+            background-color: #5a3ec8;
+        }
+
+        /* Sidebar */
+        .selection-sidebar {
+            width: 350px;
+            background-color: #1b1b1b;
+            border-left: 1px solid #333;
+            padding: 20px;
+            position: fixed;
+            right: -350px;
+            top: 0;
+            bottom: 0;
+            transition: right 0.3s;
+            z-index: 999;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .selection-sidebar.open {
+            right: 0;
+        }
+
+        .selection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .selected-tokens-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .selected-token-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #2d2d2d;
+            border-radius: 8px;
+        }
+
+        .selected-token-item img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .selected-token-info {
+            flex: 1;
+        }
+
+        .selected-token-symbol {
+            font-weight: bold;
+        }
+
+        .remove-token {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+        }
+
+        /* Slider - Hidden by default */
+        .slider-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .slider-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 50px;
+            background-color: #2d2d2d;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slider-thumb {
+            width: 50px;
+            height: 50px;
+            background-color: #6f4eff;
+            border-radius: 50%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .slider-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 50px;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .slider-track .fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: #5a3ec8;
+            width: 0;
+            border-radius: 25px;
+            transition: width 0.3s;
+        }
+
+        .confirm-text {
+            position: absolute;
+            right: 20px;
+            line-height: 50px;
+            color: white;
+            font-weight: bold;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            color: #aaa;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #6f4eff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .selection-count {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #6f4eff;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* News Modal */
+        .news-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1002;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .news-modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .news-container {
+            background-color: #1b1b1b;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-news {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .news-item {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 10px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-title {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #6f4eff;
+        }
+
+        .news-source {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="logo">CryptoLeagues.fun</div>
+    <nav>
+        <a href="#" class="active">Contests</a>
+        <a href="#">Rankings</a>
+        <a href="#" id="latestNewsBtn">Latest News</a>
+        <a href="#">My Teams</a>
+    </nav>
+    <button class="connect-wallet">Connect Wallet</button>
+</header>
+
+<!-- Main Content -->
+<main id="mainContent">
+    <h2>Choose your Token</h2>
+    <div class="search-bar">
+        <input type="text" placeholder="Search token..." id="searchInput" />
+        <button class="select-all" id="selectAllBtn">
+            Select All <span class="badge">x2 points</span>
+        </button>
+    </div>
+    <div class="tabs">
+        <button class="tab active">All</button>
+        <button class="tab">L1</button>
+        <button class="tab">L2</button>
+        <button class="tab">MemeCoin</button>
+        <button class="tab">Others</button>
+    </div>
+    
+    <div class="token-cards" id="tokenCards">
+        <div class="loading">
+            <div class="spinner"></div>
+            <span>Loading tokens...</span>
+        </div>
+    </div>
+</main>
+
+<!-- Sidebar -->
+<div class="selection-sidebar" id="selectionSidebar">
+    <div class="selection-header">
+        <h3>Your Team (<span id="selectedCount">0</span>/15)</h3>
+        <button class="close-sidebar" id="closeSidebar">×</button>
+    </div>
+    <div class="selected-tokens-list" id="selectedTokensList">
+        <!-- Selected tokens will appear here -->
+    </div>
+</div>
+
+<!-- Slider Confirmation -->
+<div class="slider-container" id="sliderContainer">
+    <div class="slider-track">
+        <div class="slider-text">Slide to confirm</div>
+        <div class="fill" id="sliderFill"></div>
+        <div class="slider-thumb" id="sliderThumb">
+            →
+        </div>
+        <div class="confirm-text">CONFIRM</div>
+    </div>
+</div>
+
+<div class="selection-count" id="selectionCount">0</div>
+
+<!-- News Modal -->
+<div class="news-modal" id="newsModal">
+    <div class="news-container">
+        <div class="news-header">
+            <h3>Latest Crypto News</h3>
+            <button class="close-news" id="closeNews">×</button>
+        </div>
+        <div id="newsContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Loading news...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // CoinGecko API endpoint
+    const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h';
+    
+    // CryptoPanic API endpoint
+    const CRYPTOPANIC_API_URL = 'https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_API_KEY&public=true';
+    
+    // Global state
+    let selectedTokens = [];
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let sliderWidth = 0;
+    let allTokens = [];
+
+    // DOM elements
+    const tokenCardsContainer = document.getElementById('tokenCards');
+    const selectionSidebar = document.getElementById('selectionSidebar');
+    const selectedTokensList = document.getElementById('selectedTokensList');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sliderContainer = document.getElementById('sliderContainer');
+    const sliderThumb = document.getElementById('sliderThumb');
+    const sliderFill = document.getElementById('sliderFill');
+    const selectionCount = document.getElementById('selectionCount');
+    const selectedCount = document.getElementById('selectedCount');
+    const mainContent = document.getElementById('mainContent');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const latestNewsBtn = document.getElementById('latestNewsBtn');
+    const newsModal = document.getElementById('newsModal');
+    const closeNews = document.getElementById('closeNews');
+    const newsContent = document.getElementById('newsContent');
+
+    // Fetch token data from CoinGecko
+    async function fetchTokenData() {
+        try {
+            const response = await fetch(COINGECKO_API_URL);
+            const data = await response.json();
+            allTokens = data;
+            return data;
+        } catch (error) {
+            console.error('Error fetching token data:', error);
+            return [];
+        }
+    }
+
+    // Fetch news from CryptoPanic
+    async function fetchNews() {
+        try {
+            const response = await fetch(CRYPTOPANIC_API_URL);
+            const data = await response.json();
+            return data.results || [];
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            return [];
+        }
+    }
+
+    // Render news in modal
+    async function renderNews() {
+        newsContent.innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading news...</span></div>';
+        
+        const newsItems = await fetchNews();
+        
+        if (newsItems.length === 0) {
+            newsContent.innerHTML = '<div class="loading"><span>Failed to load news. Please try again later.</span></div>';
+            return;
+        }
+        
+        newsContent.innerHTML = '';
+        
+        newsItems.slice(0, 10).forEach(news => {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            newsItem.innerHTML = `
+                <h4 class="news-title"><a href="${news.url}" target="_blank">${news.title}</a></h4>
+                <div class="news-source">Source: ${news.source.title}</div>
+                <div class="news-date">${new Date(news.published_at).toLocaleString()}</div>
+            `;
+            newsContent.appendChild(newsItem);
+        });
+    }
+
+    // Render token cards
+    async function renderTokenCards() {
+        tokenCardsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading tokens...</span></div>';
+        
+        const tokens = await fetchTokenData();
+        
+        if (tokens.length === 0) {
+            tokenCardsContainer.innerHTML = '<div class="loading"><span>Failed to load tokens. Please try again later.</span></div>';
+            return;
+        }
+        
+        tokenCardsContainer.innerHTML = '';
+        
+        tokens.forEach(token => {
+            const priceChange = token.price_change_percentage_24h || 0;
+            const priceChangeClass = priceChange >= 0 ? 'up' : 'down';
+            const priceChangeFormatted = priceChange >= 0 ? 
+                `+${priceChange.toFixed(2)}%` : 
+                `${priceChange.toFixed(2)}%`;
+            
+            const isSelected = selectedTokens.some(t => t.id === token.id);
+            
+            const tokenCard = document.createElement('div');
+            tokenCard.className = `token-card ${isSelected ? 'selected' : ''}`;
+            tokenCard.dataset.tokenId = token.id;
+            tokenCard.innerHTML = `
+                <img src="${token.image}" 
+                     alt="${token.name} Logo" 
+                     class="token-icon"
+                     loading="lazy">
+                <div class="token-symbol">${token.symbol.toUpperCase()}</div>
+                <div class="token-price">$${token.current_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}</div>
+                <div class="price-change ${priceChangeClass}">${priceChangeFormatted}</div>
+                <button class="add-to-team">Add to team</button>
+            `;
+            
+            // Add click event to the button
+            const addButton = tokenCard.querySelector('.add-to-team');
+            addButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleTokenSelection(token);
+            });
+            
+            // Also allow clicking anywhere on the card
+            tokenCard.addEventListener('click', () => {
+                toggleTokenSelection(token);
+            });
+            
+            tokenCardsContainer.appendChild(tokenCard);
+        });
+    }
+
+    // Select all tokens
+    function selectAllTokens() {
+        if (selectedTokens.length === 15) {
+            // If already selected all, deselect all
+            selectedTokens = [];
+        } else {
+            // Select top 15 tokens
+            selectedTokens = allTokens.slice(0, 15);
+        }
+        
+        if (selectedTokens.length > 0) {
+            openSidebar();
+        } else {
+            closeSidebarHandler();
+        }
+        
+        updateSelectionUI();
+    }
+
+    // Toggle token selection
+    function toggleTokenSelection(token) {
+        const index = selectedTokens.findIndex(t => t.id === token.id);
+        
+        if (index === -1) {
+            // Add token if not already selected and we have less than 15
+            if (selectedTokens.length < 15) {
+                selectedTokens.push(token);
+                // Open sidebar when first token is selected
+                if (selectedTokens.length === 1) {
+                    openSidebar();
+                }
+            } else {
+                alert('You can only select up to 15 tokens');
+                return;
+            }
+        } else {
+            // Remove token if already selected
+            selectedTokens.splice(index, 1);
+            // Close sidebar if no tokens left
+            if (selectedTokens.length === 0) {
+                closeSidebarHandler();
+            }
+        }
+        
+        updateSelectionUI();
+    }
+
+    // Open sidebar
+    function openSidebar() {
+        selectionSidebar.classList.add('open');
+        mainContent.style.marginRight = '350px';
+        
+        // Show slider only when 15 tokens are selected
+        if (selectedTokens.length === 15) {
+            sliderContainer.classList.add('visible');
+        }
+    }
+
+    // Close sidebar
+    function closeSidebarHandler() {
+        selectionSidebar.classList.remove('open');
+        mainContent.style.marginRight = '0';
+        sliderContainer.classList.remove('visible');
+    }
+
+    // Update UI to reflect current selection
+    function updateSelectionUI() {
+        // Update card selection states
+        document.querySelectorAll('.token-card').forEach(card => {
+            const tokenId = card.dataset.tokenId;
+            const isSelected = selectedTokens.some(t => t.id === tokenId);
+            card.classList.toggle('selected', isSelected);
+        });
+        
+        // Update selected tokens list
+        selectedTokensList.innerHTML = '';
+        selectedTokens.forEach(token => {
+            const tokenItem = document.createElement('div');
+            tokenItem.className = 'selected-token-item';
+            tokenItem.innerHTML = `
+                <img src="${token.image}" alt="${token.name} Logo">
+                <div class="selected-token-info">
+                    <div class="selected-token-symbol">${token.symbol.toUpperCase()}</div>
+                </div>
+                <button class="remove-token">×</button>
+            `;
+            
+            // Add remove event
+            tokenItem.querySelector('.remove-token').addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectedTokens = selectedTokens.filter(t => t.id !== token.id);
+                // Close sidebar if no tokens left
+                if (selectedTokens.length === 0) {
+                    closeSidebarHandler();
+                }
+                updateSelectionUI();
+            });
+            
+            selectedTokensList.appendChild(tokenItem);
+        });
+        
+        // Update selection count
+        const count = selectedTokens.length;
+        selectionCount.textContent = count;
+        selectedCount.textContent = count;
+        
+        // Update select all button text
+        selectAllBtn.innerHTML = count === 15 ? 
+            'Deselect All <span class="badge">x2 points</span>' : 
+            'Select All <span class="badge">x2 points</span>';
+        
+        // Show/hide slider based on selection count
+        if (count === 15 && selectionSidebar.classList.contains('open')) {
+            sliderContainer.classList.add('visible');
+        } else {
+            sliderContainer.classList.remove('visible');
+        }
+    }
+
+    // Initialize slider functionality
+    function initSlider() {
+        sliderWidth = sliderThumb.parentElement.offsetWidth - sliderThumb.offsetWidth;
+        
+        sliderThumb.addEventListener('mousedown', startDrag);
+        sliderThumb.addEventListener('touchstart', startDrag);
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+    }
+
+    function startDrag(e) {
+        isDragging = true;
+        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        currentX = startX;
+        sliderThumb.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        
+        const x = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        const deltaX = x - startX;
+        let newX = currentX - startX + deltaX;
+        
+        // Constrain to slider bounds
+        newX = Math.max(0, Math.min(newX, sliderWidth));
+        
+        sliderThumb.style.left = `${newX}px`;
+        sliderFill.style.width = `${newX}px`;
+        
+        // If dragged all the way, consider it confirmed
+        if (newX >= sliderWidth - 10) {
+            confirmSelection();
+            resetSlider();
+            isDragging = false;
+        }
+    }
+
+    function endDrag() {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        sliderThumb.style.cursor = 'grab';
+        
+        // If not confirmed, snap back
+        if (parseInt(sliderThumb.style.left) < sliderWidth - 10) {
+            resetSlider();
+        }
+    }
+
+    function resetSlider() {
+        sliderThumb.style.left = '0';
+        sliderFill.style.width = '0';
+    }
+
+    function confirmSelection() {
+        alert(`Successfully selected 15 tokens!`);
+        // Here you would typically submit the selection to your backend
+        // For now we'll just clear the selection
+        selectedTokens = [];
+        updateSelectionUI();
+        closeSidebarHandler();
+    }
+
+    // Toggle news modal
+    function toggleNewsModal() {
+        if (newsModal.classList.contains('visible')) {
+            newsModal.classList.remove('visible');
+        } else {
+            newsModal.classList.add('visible');
+            renderNews();
+        }
+    }
+
+    // Event listeners
+    closeSidebar.addEventListener('click', closeSidebarHandler);
+    selectAllBtn.addEventListener('click', selectAllTokens);
+    latestNewsBtn.addEventListener('click', toggleNewsModal);
+    closeNews.addEventListener('click', toggleNewsModal);
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.token-card');
+        
+        cards.forEach(card => {
+            const symbol = card.querySelector('.token-symbol').textContent.toLowerCase();
+            if (symbol.includes(searchTerm)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            // In a real app, you would filter tokens by category here
+        });
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        renderTokenCards();
+        initSlider();
+    });
+</script>
+
+</body>
+</html>
